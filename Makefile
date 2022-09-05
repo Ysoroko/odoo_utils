@@ -32,10 +32,15 @@
 # sudo scp file.txt pi@[ip]:/remote/directory/
 # ex: /odoo/addons/hw_posbox_homepage
 # command to get ip address on the terminal of pi: "ip addr"
-# log file: /var/log/odoo/odoo-server.log
+# log file: cat /var/log/odoo/odoo-server.log
 
 # launch Odoo on IoT Box
-# ./odoo-bin --load=web,hw_posbox_homepage,hw_drivers --data-dir=/var/run/odoo --max-cron-threads=0
+# ./odoo-bin --load=web,hw_posbox_homepage,hw_drivers --data-dir=/var/run/odoo --max-cron-threads=0 --log-level critical
+
+
+# Git questions:
+# 1) Your branch is behind 'enterprise/14.0' by 23 commits, and can be fast-forwarded.
+# --> git rebase --autostash?
 
 # -------------------------------------VARS ----------------------------------
 
