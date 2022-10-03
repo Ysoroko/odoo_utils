@@ -2,9 +2,6 @@
 
 # PSQL:
 # -----
-# psql [db_name]
-# \l
-# DROP DATABASE [db_name];
 # dropdb [db_name]
 
 # Kill localhost process:
@@ -12,17 +9,8 @@
 # kill [pid]
 # kill -9 [pid] if 1st command doesn't work
 
-
 # GIT:
 # git branch --delete [branch_name]
-# git amend
-# git rebase [base]
-
-
-# git branch -m new-branch-name
-
-# git fetch --all --prune
-# git rebase --autostash  odoo/15.0
 
 # Working with the IoT Box:
 
@@ -30,17 +18,16 @@
 # sudo ssh pi@[ip]
 # sudo mount -o remount,rw /
 # sudo scp file.txt pi@[ip]:/remote/directory/
-# ex: /odoo/addons/hw_posbox_homepage
+# ex: /home/pi/odoo/addons/hw_posbox_homepage/views
 # command to get ip address on the terminal of pi: "ip addr"
 # log file: cat /var/log/odoo/odoo-server.log
+# find file: find . -name 'PrinterDriver.py'
 
 # launch Odoo on IoT Box
 # ./odoo-bin --load=web,hw_posbox_homepage,hw_drivers --data-dir=/var/run/odoo --max-cron-threads=0 --log-level critical
 
-
-# Git questions:
-# 1) Your branch is behind 'enterprise/14.0' by 23 commits, and can be fast-forwarded.
-# --> git rebase --autostash?
+# HTTP->HTTPS: https://[iot_box ip]     !without :8069
+# On database: replace 'web' by 'ui'
 
 # -------------------------------------VARS ----------------------------------
 
@@ -50,21 +37,19 @@ C_ADDONS_ONLY	=	--addons-path=./odoo/addons
 
 ADDONS 			= 	--addons-path=./enterprise/,./odoo/addons
 
-MODULES 		= 	point_of_sale,iot,l10n_be,pos_restaurant,pos_loyalty
+MODULES 		= 	pos_iot,iot,l10n_be,point_of_sale,pos_restaurant
 
 # ----- DATABASES
 DB 				= 	-d demo
 
 DB_COMMUNITY	=	-d community
 
-DB_MASTER		=	-d db_master
-
 DB_NO_DEMO 		= 	-d no_demo --without-demo $(MODULES)
 
 DB_NO_DEMO_C	=	-d c_no_demo --without-demo $(MODULES)
 # -----
 
-NO_LOG			=	--log-level critical
+NO_LOG			=	--log-level error
 
 INSTALL_MODULES = 	-i $(MODULES)
 
@@ -86,9 +71,6 @@ community:
 
 c_no_demo:
 	$(RUN_COMMUNITY) $(DB_NO_DEMO_C)
-
-master:
-	$(RUN) $(DB_MASTER)
 
 no_demo:
 	$(RUN) $(DB_NO_DEMO)
