@@ -24,7 +24,7 @@
 # -------------------------
 # sudo ssh pi@[ip]
 # sudo mount -o remount,rw /
-# sudo scp file.txt pi@[ip]:/remote/directory/
+# sudo scp file.txt pi@[ip]:/remote/directory/1
 # ex: /home/pi/odoo/addons/hw_posbox_homepage/views
 # ex2: /home/pi/odoo/addons/hw_drivers/iot_handlers/drivers
 # ex3: /home/pi/ctep/
@@ -53,7 +53,7 @@ C_ADDONS_ONLY	=	--addons-path=./odoo/addons
 
 ADDONS 			= 	--addons-path=./enterprise/,./odoo/addons
 
-MODULES 		= 	pos_iot,iot,l10n_be,point_of_sale,pos_restaurant
+MODULES 		= 	pos_iot,iot,l10n_be,point_of_sale
 
 # ----- DATABASES
 DB 				= 	-d demo
@@ -115,9 +115,11 @@ no_demo:
 
 # --- IP Utils ---
 
+# Show my ip address
 ip:
 	@echo $(MY_IP);
 
+# Open new Chrome tab with our ip address
 tab:
 	@google-chrome $(LOCAL)
 
