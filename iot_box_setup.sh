@@ -139,7 +139,7 @@ check_status "" $loading_pid
 center_print "Restart / Reboot / Manual / Copy"
 # If no argument is provided, restart odoo on the IoT box
 if [ -z "${manu}" ] ; then
-    sshpass -p "raspberry" ssh pi@${ip} 'sudo service odoo restart'
+    sshpass -p "raspberry" ssh pi@${ip} 'sudo service odoo restart' >/dev/null 2>&1
     check_status "Restart Odoo server"
 
 # If argument is 'scp' only copy files without restarting
@@ -153,7 +153,7 @@ elif [ "${manu}" = "reboot" ] ; then
 
 # If argument is 'manual', start Odoo manually on the IoT box
 elif [ "${manu}" = "manual" ] ; then
-    sshpass -p "raspberry" ssh pi@${ip} 'sudo service odoo stop'
+    sshpass -p "raspberry" ssh pi@${ip} 'sudo service odoo stop' >/dev/null 2>&1
     sshpass -p "raspberry" ssh pi@${ip} 'odoo/./odoo-bin --load=web,hw_proxy,hw_posbox_homepage,hw_escpos,hw_drivers --limit-time-cpu=600 --limit-time-real=1200 --max-cron-threads=0'
     check_status "Start Odoo Manually"
 fi
