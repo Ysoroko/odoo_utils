@@ -1,8 +1,18 @@
 #!/bin/bash
 
 # Script arguments
+# "ip": IoT Box ip address
+# "manu": action to do after the setup and files copy to the IoT box
 ip=${1}
 manu=${2}
+
+# Possible arguments for second argument "manu":
+#   - not provided  --> copy files and restart Odoo on the IoT box
+#   - 'scp'         --> only copy files without restarting Odoo on the IoT box
+#   - 'reboot'      --> copy files and then reboot the IoT box
+#   - 'manual'      --> copy files and start Odoo manually in the terminal on the IoT box
+
+# ============================== VARIABLES ==============================
 
 # Repositories paths
 ODOO_ADDONS_DIR='/home/odoo/src/odoo/addons'
@@ -29,6 +39,8 @@ green_checkmark="\t[${green}$checkmark${normal}]\n"
 red_crossmark="\t[${red}$crossmark${normal}]\n"
 # ------
 
+# ============================== FUNCTIONS ==============================
+
 # Print out argument with cenered output surrounded by "="
 function center_print() {
     padding="$(printf '%0.1s' ={1..500})"
@@ -40,8 +52,7 @@ function loading() {
     spin='-\|/'
     colour=${magenta}
 
-    # Animation refresh frequency
-    local delay=0.075
+    local delay=0.075 # Animation refresh frequency
     local spinstr='|/-\'
     printf "%-${width_text}b" "  - $1"
     while [ 1 ]; do
@@ -56,30 +67,46 @@ function loading() {
 # Checks the exit status of the last ran command
 # If it succeded, displays a green checkmark
 # If it failed, displays a red crossmark
-function ready() {
+function check_status() {
     let last_command_status=$?
 
-    if [ $last_command_status -eq 0 ]
-    then
-        printf "%-${width_text}b" "  - $1"
+    if [ $last_command_status -eq 0 ]; then
+        if [ $# -eq 1 ]; then
+            printf "%-${width_text}b" "  - $1"
+        else
+            kill $2 >/dev/null 2>&1
+            printf "\b\b\b\b\b  \b\b\b\b"
+        fi
         printf "%-${width_checkmark}b" "$green_checkmark"
     else
-        printf "%-${width_text}b" "  - $1"
+        if [ $# -eq 1 ]; then
+            printf "%-${width_text}b" "  - $1"
+        else
+            kill $2 >/dev/null 2>&1
+            printf "\b\b\b\b\b  \b\b\b\b"
+        fi
         printf "%-${width_checkmark}b" "$red_crossmark"
     fi
 }
 
+# ============================== SCRIPT ==============================
+
+# ------ PING IOT BOX ------
+center_print "Connecting to IoT Box"
+ping ${1} -c 1 &> /dev/null
+check_status "IoT box reachable"
+
 # ------ IOT BOX SETUP ------
 center_print "Setting up the IoT Box"
 ssh-keyscan -H ${ip} >> ~/.ssh/known_hosts >/dev/null 2>&1
-ready "IoT added to known hosts"
+check_status "IoT added to known hosts"
 ssh-keygen -f "/home/odoo/.ssh/known_hosts" -R ${ip} >/dev/null 2>&1
-ready "IoT ssh key generated"
+check_status "IoT ssh key generated"
 
 sshpass -p "raspberry" ssh pi@${ip} 'sudo killall python3' >/dev/null 2>&1
-ready "Python on IoT box stopped"
+check_status "Python on IoT box stopped"
 sshpass -p "raspberry" ssh pi@${ip} 'sudo mount -o remount,rw /' >/dev/null 2>&1
-ready "IoT box set to write mode"
+check_status "IoT box set to write mode"
 
 # ------ TRANSFER FILES TO IOT BOX ------
 center_print "Sending files to" "${1}"
@@ -87,60 +114,48 @@ center_print "Sending files to" "${1}"
 # addons/hw_posbox_homepage files
 loading "addons/hw_posbox_homepage" &
 loading_pid=$!
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_posbox_homepage/controllers/main.py pi@${ip}:/home/pi/odoo/addons/hw_posbox_homepage/controllers/
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_posbox_homepage/views/* pi@${ip}:/home/pi/odoo/addons/hw_posbox_homepage/views/
-kill $loading_pid >/dev/null 2>&1
-printf "\b\b\b\b\b  \b\b\b\b%${width_checkmark}b" "$green_checkmark"
+sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_posbox_homepage/controllers/main.py pi@${ip}:/home/pi/odoo/addons/hw_posbox_homepage/controllers/ >/dev/null 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_posbox_homepage/views/* pi@${ip}:/home/pi/odoo/addons/hw_posbox_homepage/views/ >/dev/null 2>&1
+check_status "" $loading_pid
 
 # addons/hw_drivers files
 loading "addons/hw_drivers" &
 loading_pid=$!
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/controllers/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/controllers/
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/iot_handlers/drivers/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/tools/helpers.py pi@${ip}:/home/pi/odoo/addons/hw_drivers/tools/
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/iot_handlers/drivers/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/iot_handlers/interfaces/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/interfaces/
-kill $loading_pid >/dev/null 2>&1
-printf "\b\b\b\b\b  \b\b\b\b%${width_checkmark}b" "$green_checkmark"
+sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/controllers/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/controllers/ >/dev/null 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/iot_handlers/drivers/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/ >/dev/null 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/tools/helpers.py pi@${ip}:/home/pi/odoo/addons/hw_drivers/tools/ >/dev/null 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/iot_handlers/drivers/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/ >/dev/null 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/iot_handlers/interfaces/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/interfaces/ >/dev/null 2>&1
+check_status "" $loading_pid
 
-# addons/point_of_sale/tools/posbox/configuration/
+# addons/point_of_sale/tools/posbox/configuration/ files
 loading "posbox/configuration" &
 loading_pid=$!
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/point_of_sale/tools/posbox/configuration/* pi@${ip}:/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/
-kill $loading_pid >/dev/null 2>&1
-printf "\b\b\b\b\b  \b\b\b\b%${width_checkmark}b" "$green_checkmark"
+sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/point_of_sale/tools/posbox/configuration/* pi@${ip}:/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/ >/dev/null 2>&1
+check_status "" $loading_pid
 # --------------------------------
 
 # ------ MANUAL SECOND ARGUMENT STUFF ------
 center_print "Restart / Reboot / Manual / Copy"
 # If no argument is provided, restart odoo on the IoT box
 if [ -z "${manu}" ] ; then
-    loading "Restart Odoo server" &
-    loading_pid=$!
     sshpass -p "raspberry" ssh pi@${ip} 'sudo service odoo restart'
-    kill $loading_pid >/dev/null 2>&1
-    printf "\b\b\b\b\b  \b\b\b\b%${width_checkmark}b" "$green_checkmark"
+    check_status "Restart Odoo server"
 
 # If argument is 'scp' only copy files without restarting
 elif [ "${manu}" = "scp" ] ; then
-    loading "Don't start Odoo server" &
-    loading_pid=$!
-    kill $loading_pid >/dev/null 2>&1
-    printf "\b\b\b\b\b  \b\b\b\b%${width_checkmark}b" "$green_checkmark"
+    check_status "Only copy files"
 
 # If argument is 'reboot', reboot the box after copying
 elif [ "${manu}" = "reboot" ] ; then
-    loading "Reboot IoT Box" &
-    loading_pid=$!
-    sshpass -p "raspberry" ssh pi@${ip} 'sudo reboot'
-    kill $loading_pid >/dev/null 2>&1
-    printf "\b\b\b\b\b  \b\b\b\b%${width_checkmark}b" "$green_checkmark"
+    sshpass -p "raspberry" ssh pi@${ip} 'sudo reboot' >/dev/null 2>&1
+    check_status "Reboot IoT Box"
 
 # If argument is 'manual', start Odoo manually on the IoT box
 elif [ "${manu}" = "manual" ] ; then
-    echo "Start Odoo manually"
     sshpass -p "raspberry" ssh pi@${ip} 'sudo service odoo stop'
     sshpass -p "raspberry" ssh pi@${ip} 'odoo/./odoo-bin --load=web,hw_proxy,hw_posbox_homepage,hw_escpos,hw_drivers --limit-time-cpu=600 --limit-time-real=1200 --max-cron-threads=0'
+    check_status "Start Odoo Manually"
 fi
 
 printf "\n===================================================\n\n"
