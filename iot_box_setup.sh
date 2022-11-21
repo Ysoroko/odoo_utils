@@ -12,6 +12,7 @@ ENTERPRISE_DIR='/home/odoo/src/enterprise'
 # --- Text Utils ---
 # Colors
 normal=$(tput sgr0)
+red=$(tput setaf 1)
 green=$(tput setaf 2)
 cyan=$(tput setaf 6)
 magenta=$(tput setaf 5)
@@ -23,7 +24,9 @@ width_checkmark=10
 
 # Special Symbols
 checkmark="\xE2\x9C\x94"
+crossmark="\xe2\x9c\x95"
 green_checkmark="\t[${green}$checkmark${normal}]\n"
+red_crossmark="\t[${red}$crossmark${normal}]\n"
 # ------
 
 # Print out argument with cenered output surrounded by "="
@@ -37,7 +40,7 @@ function loading() {
     spin='-\|/'
     colour=${magenta}
 
-    i=0
+    # Animation refresh frequency
     local delay=0.075
     local spinstr='|/-\'
     printf "%-${width_text}b" "  - $1"
@@ -50,18 +53,31 @@ function loading() {
     done
 }
 
+# Checks the exit status of the last ran command
+# If it succeded, displays a green checkmark
+# If it failed, displays a red crossmark
 function ready() {
-    printf "%-${width_text}b" "  - $1"
-    printf "%-${width_checkmark}b" "$green_checkmark"
+    let last_command_status=$?
+
+    if [ $last_command_status -eq 0 ]
+    then
+        printf "%-${width_text}b" "  - $1"
+        printf "%-${width_checkmark}b" "$green_checkmark"
+    else
+        printf "%-${width_text}b" "  - $1"
+        printf "%-${width_checkmark}b" "$red_crossmark"
+    fi
 }
 
 # ------ IOT BOX SETUP ------
 center_print "Setting up the IoT Box"
 ssh-keyscan -H ${ip} >> ~/.ssh/known_hosts >/dev/null 2>&1
-ssh-keygen -f "/home/odoo/.ssh/known_hosts" -R ${ip} >/dev/null 2>&1
 ready "IoT added to known hosts"
+ssh-keygen -f "/home/odoo/.ssh/known_hosts" -R ${ip} >/dev/null 2>&1
+ready "IoT ssh key generated"
 
 sshpass -p "raspberry" ssh pi@${ip} 'sudo killall python3' >/dev/null 2>&1
+ready "Python on IoT box stopped"
 sshpass -p "raspberry" ssh pi@${ip} 'sudo mount -o remount,rw /' >/dev/null 2>&1
 ready "IoT box set to write mode"
 
