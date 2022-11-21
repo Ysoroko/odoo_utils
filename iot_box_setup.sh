@@ -28,8 +28,6 @@ green_checkmark="\t[${green}$checkmark${normal}]\n"
 
 # Print out argument with cenered output surrounded by "="
 function center_print() {
-    let len=(50-${#1}-${#2}-2)/2
-    echo $len
     padding="$(printf '%0.1s' ={1..500})"
     printf '\n%*.*s %s %*.*s\n\n' 0 "$(((termwidth-2-${#1}-${#2})/2))" "$padding" "${cyan}$1${normal} ${magenta}$2${normal}" 0 "$(((termwidth-1-${#1}-${#2})/2))" "$padding"
 }
