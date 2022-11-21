@@ -28,8 +28,10 @@ green_checkmark="\t[${green}$checkmark${normal}]\n"
 
 # Print out argument with cenered output surrounded by "="
 function center_print() {
+    let len=(50-${#1}-${#2}-2)/2
+    echo $len
     padding="$(printf '%0.1s' ={1..500})"
-    printf '\n%*.*s %s %*.*s\n\n' 0 "$(((termwidth-2-${#1})/2))" "$padding" "${cyan}$1${normal} ${magenta}$2${normal}" 0 "$(((termwidth-1-${#1})/2))" "$padding"
+    printf '\n%*.*s %s %*.*s\n\n' 0 "$(((termwidth-2-${#1}-${#2})/2))" "$padding" "${cyan}$1${normal} ${magenta}$2${normal}" 0 "$(((termwidth-1-${#1}-${#2})/2))" "$padding"
 }
 
 # Display loading spinster and green checkmard when finished
@@ -56,7 +58,6 @@ function ready() {
 }
 
 # ------ IOT BOX SETUP ------
-
 center_print "Setting up the IoT Box"
 ssh-keyscan -H ${ip} >> ~/.ssh/known_hosts >/dev/null 2>&1
 ssh-keygen -f "/home/odoo/.ssh/known_hosts" -R ${ip} >/dev/null 2>&1
@@ -65,7 +66,6 @@ ready "IoT added to known hosts"
 sshpass -p "raspberry" ssh pi@${ip} 'sudo killall python3' >/dev/null 2>&1
 sshpass -p "raspberry" ssh pi@${ip} 'sudo mount -o remount,rw /' >/dev/null 2>&1
 ready "IoT box set to write mode"
-
 
 # ------ TRANSFER FILES TO IOT BOX ------
 center_print "Sending files to" "${1}"
@@ -96,7 +96,6 @@ sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/point_of_sale/tools/posbox/configu
 kill $loading_pid >/dev/null 2>&1
 printf "\b\b\b\b\b  \b\b\b\b%${width_checkmark}b" "$green_checkmark"
 # --------------------------------
-
 
 # ------ MANUAL SECOND ARGUMENT STUFF ------
 center_print "Restart / Reboot / Manual / Copy"
@@ -130,4 +129,4 @@ elif [ "${manu}" = "manual" ] ; then
     sshpass -p "raspberry" ssh pi@${ip} 'odoo/./odoo-bin --load=web,hw_proxy,hw_posbox_homepage,hw_escpos,hw_drivers --limit-time-cpu=600 --limit-time-real=1200 --max-cron-threads=0'
 fi
 
-printf "\n=========================================\n\n"
+printf "\n===================================================\n\n"
