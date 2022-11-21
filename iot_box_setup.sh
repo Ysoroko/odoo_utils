@@ -16,14 +16,14 @@ green=$(tput setaf 2)
 cyan=$(tput setaf 6)
 magenta=$(tput setaf 5)
 
+# Size utils
+termwidth=50
+width_text=30
+width_checkmark=10
+
 # Special Symbols
 checkmark="\xE2\x9C\x94"
 green_checkmark="\t[${green}$checkmark${normal}]\n"
-
-# Size utils
-termwidth=60
-width_text=30
-width_checkmark=10
 # ------
 
 # Print out argument with cenered output surrounded by "="
@@ -50,15 +50,24 @@ function loading() {
     done
 }
 
-# ------ Iot Box Setup ------
+function ready() {
+    printf "%-${width_text}b" "  - $1"
+    printf "%-${width_checkmark}b" "$green_checkmark"
+}
+
+# ------ IOT BOX SETUP ------
+
 center_print "Setting up the IoT Box"
-ssh-keygen -f "/home/odoo/.ssh/known_hosts" -R ${ip}
-ssh-keyscan -H ${ip} >>~/.ssh/known_hosts
+ssh-keyscan -H ${ip} >> ~/.ssh/known_hosts >/dev/null 2>&1
+ssh-keygen -f "/home/odoo/.ssh/known_hosts" -R ${ip} >/dev/null 2>&1
+ready "IoT added to known hosts"
 
-sshpass -p "raspberry" ssh pi@${ip} 'sudo killall python3'
-sshpass -p "raspberry" ssh pi@${ip} 'sudo mount -o remount,rw /'
+sshpass -p "raspberry" ssh pi@${ip} 'sudo killall python3' >/dev/null 2>&1
+sshpass -p "raspberry" ssh pi@${ip} 'sudo mount -o remount,rw /' >/dev/null 2>&1
+ready "IoT box set to write mode"
 
-# ------ Transfer files to IoT box ------
+
+# ------ TRANSFER FILES TO IOT BOX ------
 center_print "Sending files to" "${1}"
 
 # addons/hw_posbox_homepage files
@@ -88,8 +97,9 @@ kill $loading_pid >/dev/null 2>&1
 printf "\b\b\b\b\b  \b\b\b\b%${width_checkmark}b" "$green_checkmark"
 # --------------------------------
 
-# ------ Manual second argument stuff ------
-center_print "Restart / Reboot / Copy"
+
+# ------ MANUAL SECOND ARGUMENT STUFF ------
+center_print "Restart / Reboot / Manual / Copy"
 # If no argument is provided, restart odoo on the IoT box
 if [ -z "${manu}" ] ; then
     loading "Restart Odoo server" &
@@ -119,3 +129,5 @@ elif [ "${manu}" = "manual" ] ; then
     sshpass -p "raspberry" ssh pi@${ip} 'sudo service odoo stop'
     sshpass -p "raspberry" ssh pi@${ip} 'odoo/./odoo-bin --load=web,hw_proxy,hw_posbox_homepage,hw_escpos,hw_drivers --limit-time-cpu=600 --limit-time-real=1200 --max-cron-threads=0'
 fi
+
+printf "\n=========================================\n\n"
