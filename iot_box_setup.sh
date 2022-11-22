@@ -25,8 +25,9 @@ fi
 # ============================== VARIABLES ==============================
 
 # Repositories paths
-ODOO_ADDONS_DIR='/home/odoo/src/odoo/addons'
-ENTERPRISE_DIR='/home/odoo/src/enterprise'
+# Adapt these to your local directories
+ODOO_ADDONS_PATH='/home/odoo/src/odoo/addons'
+KNOWN_HOSTS_DIR='/root/.ssh/known_hosts'
 
 
 # --- Text Utils ---
@@ -126,8 +127,7 @@ center_print "Setting up the IoT Box"
 
 ssh-keyscan -H ${ip} >> ~/.ssh/known_hosts >$redirection 2>&1
 check_status "IoT added to known hosts"
-ssh-keygen -f "/root/.ssh/known_hosts" -R ${ip} >$redirection 2>&1
-ssh-keygen -f "/home/odoo/.ssh/known_hosts" -R ${ip} >$redirection 2>&1
+ssh-keygen -f ${KNOWN_HOSTS_DIR} -R ${ip} >$redirection 2>&1
 check_status "IoT ssh key generated"
 
 sshpass -p "raspberry" ssh -o StrictHostKeyChecking=no pi@${ip} 'sudo killall python3' >$redirection 2>&1
@@ -141,24 +141,24 @@ center_print "Sending files to" "${1}"
 # addons/hw_posbox_homepage files
 loading "addons/hw_posbox_homepage" &
 loading_pid=$!
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_posbox_homepage/controllers/main.py pi@${ip}:/home/pi/odoo/addons/hw_posbox_homepage/controllers/ >$redirection 2>&1
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_posbox_homepage/views/* pi@${ip}:/home/pi/odoo/addons/hw_posbox_homepage/views/ >$redirection 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_posbox_homepage/controllers/main.py pi@${ip}:/home/pi/odoo/addons/hw_posbox_homepage/controllers/ >$redirection 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_posbox_homepage/views/* pi@${ip}:/home/pi/odoo/addons/hw_posbox_homepage/views/ >$redirection 2>&1
 check_status "" $loading_pid
 
 # addons/hw_drivers files
 loading "addons/hw_drivers" &
 loading_pid=$!
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/controllers/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/controllers/ >$redirection 2>&1
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/iot_handlers/drivers/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/ >$redirection 2>&1
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/tools/helpers.py pi@${ip}:/home/pi/odoo/addons/hw_drivers/tools/ >$redirection 2>&1
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/iot_handlers/drivers/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/ >$redirection 2>&1
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/hw_drivers/iot_handlers/interfaces/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/interfaces/ >$redirection 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/controllers/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/controllers/ >$redirection 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/iot_handlers/drivers/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/ >$redirection 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/tools/helpers.py pi@${ip}:/home/pi/odoo/addons/hw_drivers/tools/ >$redirection 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/iot_handlers/drivers/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/ >$redirection 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/iot_handlers/interfaces/* pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/interfaces/ >$redirection 2>&1
 check_status "" $loading_pid
 
 # addons/point_of_sale/tools/posbox/configuration/ files
 loading "posbox/configuration" &
 loading_pid=$!
-sshpass -p "raspberry" scp ${ODOO_ADDONS_DIR}/point_of_sale/tools/posbox/configuration/* pi@${ip}:/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/ >$redirection 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/point_of_sale/tools/posbox/configuration/* pi@${ip}:/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/ >$redirection 2>&1
 check_status "" $loading_pid
 # --------------------------------
 
