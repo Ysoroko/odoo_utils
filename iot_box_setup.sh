@@ -26,6 +26,7 @@ red=$(tput setaf 1)
 green=$(tput setaf 2)
 cyan=$(tput setaf 6)
 magenta=$(tput setaf 5)
+bold=$(tput bold)
 
 # Size utils
 termwidth=50
@@ -41,13 +42,17 @@ red_crossmark="\t[${red}$crossmark${normal}]\n"
 
 # ============================== FUNCTIONS ==============================
 
-# Print out argument with cenered output surrounded by "="
+# Print out argument with centered output surrounded by "="
 function center_print() {
     padding="$(printf '%0.1s' ={1..500})"
     printf '\n%*.*s %s %*.*s\n\n' 0 "$(((termwidth-2-${#1}-${#2})/2))" "$padding" "${cyan}$1${normal} ${magenta}$2${normal}" 0 "$(((termwidth-1-${#1}-${#2})/2))" "$padding"
 }
 
-# Display loading spinster and green checkmard when finished
+function line_print() {
+    printf "\n===================================================\n\n"
+}
+
+# Display loading spinster until the process is "killed" from outside
 function loading() {
     spin='-\|/'
     colour=${magenta}
@@ -65,28 +70,35 @@ function loading() {
 }
 
 # Checks the exit status of the last ran command
-# If it succeded, displays a green checkmark
-# If it failed, displays a red crossmark
+# If it succeded (exit code = 0), displays a green checkmark
+# If it failed (exit code != 0), displays a red crossmark
+#
+# Accepts two arguments:
+#   1) The description to display (ex: "IoT box reachable")
+#   2) The process id of the "loading" function call to kill (optional)
 function check_status() {
     let last_command_status=$?
 
     if [ $last_command_status -eq 0 ]; then
-        if [ $# -eq 1 ]; then
-            printf "%-${width_text}b" "  - $1"
-        else
-            kill $2 >/dev/null 2>&1
-            printf "\b\b\b\b\b  \b\b\b\b"
-        fi
-        printf "%-${width_checkmark}b" "$green_checkmark"
+        symbol=$green_checkmark
     else
-        if [ $# -eq 1 ]; then
-            printf "%-${width_text}b" "  - $1"
-        else
-            kill $2 >/dev/null 2>&1
-            printf "\b\b\b\b\b  \b\b\b\b"
-        fi
-        printf "%-${width_checkmark}b" "$red_crossmark"
+        symbol=$red_crossmark
     fi
+
+    if [ $# -eq 1 ]; then
+        printf "%-${width_text}b" "  - $1"
+    else
+        kill $2 >/dev/null 2>&1
+        printf "\b\b\b\b\b  \b\b\b\b"
+    fi
+    printf "%-${width_checkmark}b" "$symbol"
+}
+
+# Display error message and stops the script
+function error_and_exit() {
+    printf "\n${bold}${red}Error:${normal}\t $1\n"
+    line_print
+    exit 1
 }
 
 # ============================== SCRIPT ==============================
@@ -95,15 +107,20 @@ function check_status() {
 center_print "Connecting to IoT Box"
 ping ${1} -c 1 &> /dev/null
 check_status "IoT box reachable"
+if [ $last_command_status -ne 0 ]; then
+    error_and_exit "IoT box is unreachable at this moment"
+fi
 
 # ------ IOT BOX SETUP ------
 center_print "Setting up the IoT Box"
+
 ssh-keyscan -H ${ip} >> ~/.ssh/known_hosts >/dev/null 2>&1
 check_status "IoT added to known hosts"
+ssh-keygen -f "/root/.ssh/known_hosts" -R ${ip} >/dev/null 2>&1
 ssh-keygen -f "/home/odoo/.ssh/known_hosts" -R ${ip} >/dev/null 2>&1
 check_status "IoT ssh key generated"
 
-sshpass -p "raspberry" ssh pi@${ip} 'sudo killall python3' >/dev/null 2>&1
+sshpass -p "raspberry" ssh -o StrictHostKeyChecking=no pi@${ip} 'sudo killall python3' >/dev/null 2>&1
 check_status "Python on IoT box stopped"
 sshpass -p "raspberry" ssh pi@${ip} 'sudo mount -o remount,rw /' >/dev/null 2>&1
 check_status "IoT box set to write mode"
@@ -158,4 +175,4 @@ elif [ "${manu}" = "manual" ] ; then
     check_status "Start Odoo Manually"
 fi
 
-printf "\n===================================================\n\n"
+line_print
