@@ -79,7 +79,7 @@ function loading() {
 function check_status() {
     let last_command_status=$?
 
-    if [ $last_command_status -eq 0 ]; then
+    if [[ $last_command_status -eq 0 ]] || [[($last_command_status -eq 255 && $1="Reboot IoT Box") ]]; then
         symbol=$green_checkmark
     else
         symbol=$red_crossmark
@@ -105,7 +105,7 @@ function error_and_exit() {
 
 # ------ PING IOT BOX ------
 center_print "Connecting to IoT Box"
-ping ${1} -c 1 &> /dev/null
+ping ${1} -c 1 -w 3 &> /dev/null
 check_status "IoT box reachable"
 if [ $last_command_status -ne 0 ]; then
     error_and_exit "IoT box is unreachable at this moment"
