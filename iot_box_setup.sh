@@ -1,20 +1,13 @@
 #!/bin/bash
 
-# Script arguments
-# "ip": IoT Box ip address
-# "manu": action to do after the setup and files copy to the IoT box
-# "verbose": if the third argument is equal to "verbose", display info/error/debug messages
+# ============================== ARGUMENTS ==============================
+# "ip": IoT Box ip address (required)
+# "manu": action to do after the setup and files copy to the IoT box (optional)
+# "verbose": if the third argument is equal to "verbose", display info/error/debug messages (optional)
 
 ip=${1}
 manu=${2}
 verbose=${3}
-
-# Show commands messages only if the third argument is "verbose"
-if [ "${verbose}" = 'verbose' ]; then
-    redirection="/dev/stderr"
-else
-    redirection="/dev/null"
-fi
 
 # Possible arguments for second argument "manu":
 #   - not provided/anything --> copy files and restart Odoo on the IoT box
@@ -25,7 +18,7 @@ fi
 # ============================== VARIABLES ==============================
 
 # Repositories paths
-# Adapt these to your local directories
+# Change these to your corresponding paths if needed
 ODOO_ADDONS_PATH='/home/odoo/src/odoo/addons'
 KNOWN_HOSTS_DIR='/root/.ssh/known_hosts'
 
@@ -113,6 +106,19 @@ function error_and_exit() {
 }
 
 # ============================== SCRIPT ==============================
+
+# ------ ARGUMENTS SETUP ------
+# If no arguments is provided, ask the user to give the Iot Box ip address
+if [ $# -eq 0 ]; then
+    error_and_exit "No IoT box ip address given as argument"
+fi
+
+# Show commands messages only if the third argument is "verbose"
+if [ "${verbose}" = 'verbose' ]; then
+    redirection="/dev/stderr"
+else
+    redirection="/dev/null"
+fi
 
 # ------ PING IOT BOX ------
 center_print "Connecting to IoT Box"
