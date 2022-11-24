@@ -107,10 +107,16 @@ function error_and_exit() {
 
 # ============================== SCRIPT ==============================
 
+line_print
+
 # ------ ARGUMENTS SETUP ------
 # If no arguments is provided, ask the user to give the Iot Box ip address
 if [ $# -eq 0 ]; then
     error_and_exit "No IoT box ip address given as argument"
+fi
+
+if [ "$EUID" -ne 0 ]; then
+    error_and_exit "Please run this script with 'sudo'"
 fi
 
 # Show commands messages only if the third argument is "verbose"
