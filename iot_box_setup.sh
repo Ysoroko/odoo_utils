@@ -115,6 +115,7 @@ if [ $# -eq 0 ]; then
     error_and_exit "No IoT box ip address given as argument"
 fi
 
+# If the script is ran without root access, stop and require it
 if [ "$EUID" -ne 0 ]; then
     error_and_exit "Please run this script with 'sudo'"
 fi
