@@ -173,6 +173,16 @@ loading "posbox/configuration" &
 loading_pid=$!
 sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/point_of_sale/tools/posbox/configuration/* pi@${ip}:/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/ >$redirection 2>&1
 check_status "" $loading_pid
+
+# Worldline CTEP
+# Overwrite the CTEP library on the IoT box with our own
+loading "worldline/ctep" &
+loading_pid=$!
+sshpass -p "raspberry" ssh pi@${ip} 'sudo rm -rf /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep' >$redirection 2>&1
+sshpass -p "raspberry" scp -r /home/odoo/src/worldline/ctep pi@${ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib >$redirection 2>&1
+sshpass -p "raspberry" ssh pi@${ip} "make -sC '/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep/'" >$redirection 2>&1
+check_status "Worldline CTEP" $loading_pid
+
 # --------------------------------
 
 # ------ MANUAL SECOND ARGUMENT STUFF ------
