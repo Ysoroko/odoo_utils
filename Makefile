@@ -89,7 +89,7 @@ MY_IP			=	$(shell ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($$2,a," ");pr
 LOCAL			=	"$(MY_IP):8069"
 
 # ------------------------------------- RULES ---------------------------------
-
+# windows launch: python odoo-bin -r odoo -w odoo  --addons-path=addons -d odoo
 all: normal
 
 normal:
