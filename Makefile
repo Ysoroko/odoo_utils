@@ -14,8 +14,10 @@
 
 # Six Ips:
 # 10.30.66.50
+# 192.168.0.122
 # 192.168.1.11
-# 192.168.1.9
+# 192.168.1.9 <--
+#
 
 
 # Working with the IoT Box:
@@ -27,25 +29,30 @@
 # sudo scp file.txt pi@[ip]:/remote/directory/1
 # ex: /home/pi/odoo/addons/hw_posbox_homepage/views
 # ex2: /home/pi/odoo/addons/hw_drivers/iot_handlers/drivers
-# ex3: /home/pi/ctep/
+# ex3: /home/pi/odoo/addons/hw_drivers/iot_handlers/lib
 # command to get ip address on the terminal of pi: "ip addr"
 #
 # Copy a directory: scp -r
 
-#
-# log file: cat /var/log/odoo/odoo-server.log
-#
+# log file: \
+cat /var/log/odoo/odoo-server.log
+
+# reset log file \
+echo "" > /var/log/odoo/odoo-server.log
+
 # find file: find . -name 'PrinterDriver.py'
 
-# launch Odoo on IoT Box
-# ./odoo-bin --load=web,hw_posbox_homepage,hw_drivers --data-dir=/var/run/odoo --max-cron-threads=0 --log-level critical
+# launch Odoo on IoT Box \
+./odoo-bin --load=web,hw_posbox_homepage,hw_drivers --data-dir=/var/run/odoo --max-cron-threads=0 --log-level critical
 
-# HTTP->HTTPS: https://[iot_box ip]     !without :8069
+# HTTP->HTTPS:
+# https://[iot_box ip]     !without :8069
 # On database: replace 'web' by 'ui'
 
 # Log in as support: [client website]/_odoo/support
 
 # -------------------------------------VARS ----------------------------------
+
 
 EXECUTABLE 		=	./odoo/odoo-bin
 
@@ -53,10 +60,11 @@ C_ADDONS_ONLY	=	--addons-path=./odoo/addons
 
 ADDONS 			= 	--addons-path=./enterprise/,./odoo/addons
 
-MODULES 		= 	pos_iot,iot,l10n_be,point_of_sale
+MODULES 		= 	pos_iot,l10n_be
+
 
 # ----- DATABASES
-DB 				= 	-d demo
+DB 				= 	-d master
 
 DB14			= 	-d 14
 
@@ -78,7 +86,7 @@ INSTALL_MODULES = 	-i $(MODULES)
 
 UPDATE_MODULES 	= 	-u $(MODULES)
 
-RUN				=	$(EXECUTABLE) $(ADDONS) $(DB) $(INSTALL_MODULES) $(UPDATE_MODULES)
+RUN				=	$(EXECUTABLE) $(ADDONS) $(INSTALL_MODULES) # $(UPDATE_MODULES) $(NO_LOG)
 
 RUN_COMMUNITY	=	$(EXECUTABLE) $(C_ADDONS_ONLY) $(DB) $(INSTALL_MODULES) $(UPDATE_MODULES)
 
@@ -89,7 +97,8 @@ MY_IP			=	$(shell ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($$2,a," ");pr
 LOCAL			=	"$(MY_IP):8069"
 
 # ------------------------------------- RULES ---------------------------------
-# windows launch: python odoo-bin -r odoo -w odoo  --addons-path=addons -d odoo
+# ./odoo/odoo-bin --addons-path=./enterprise/,./odoo/addons -i pos_iot,iot,l10n_be,point_of_sale -u pos_iot,iot,l10n_be,point_of_sale -d 16
+
 all: normal
 
 normal:
@@ -102,7 +111,7 @@ normal:
 	$(RUN) $(DB15)
 
 16:
-	$(RUN) $(DB16)
+	$(RUN) $(DB16) $(NO_LOG)
 
 community:
 	$(RUN_COMMUNITY) $(DB_COMMUNITY)
@@ -112,6 +121,7 @@ c_no_demo:
 
 no_demo:
 	$(RUN) $(DB_NO_DEMO)
+
 
 # --- IP Utils ---
 
@@ -123,5 +133,6 @@ ip:
 tab:
 	@google-chrome $(LOCAL)
 
+# -------
 
 .PHONY: all normal 14 15 16 community c_no_demo no_demo ip tab
