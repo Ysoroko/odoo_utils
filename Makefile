@@ -1,9 +1,5 @@
 # ------------------------------------- CMDS ----------------------------------
 
-# PSQL:
-# -----
-# dropdb [db_name]
-
 # Kill localhost process:
 # sudo lsof -iTCP:8069 -sTCP:LISTEN
 # kill [pid]
