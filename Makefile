@@ -1,3 +1,7 @@
+# This Makefile needs to be placed in the parent directory of
+# your 'odoo' and 'enterprise' directories (by default, 'src')
+# It will look for the Odoo bin at './odoo/odoo-bin'
+
 # ------------------------------------- CMDS ----------------------------------
 
 # Kill localhost process:
@@ -76,6 +80,7 @@ DB_NO_DEMO_C	=	-d c_no_demo --without-demo $(MODULES)
 
 # -----
 
+# you can add "$(NO_LOG)" at the end of any execution rule to only show error output
 NO_LOG			=	--log-level error
 
 INSTALL_MODULES = 	-i $(MODULES)
@@ -84,20 +89,22 @@ UPDATE_MODULES 	= 	-u $(MODULES)
 
 RUN				=	$(EXECUTABLE) $(ADDONS) $(INSTALL_MODULES) # $(UPDATE_MODULES) $(NO_LOG)
 
-RUN_COMMUNITY	=	$(EXECUTABLE) $(C_ADDONS_ONLY) $(DB) $(INSTALL_MODULES) $(UPDATE_MODULES)
+RUN_COMMUNITY	=	$(EXECUTABLE) $(C_ADDONS_ONLY) $(INSTALL_MODULES)
 
 # --- IP Utils ---
 
+# extract local ip address
 MY_IP			=	$(shell ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($$2,a," ");print a[1]}')
 
 LOCAL			=	"$(MY_IP):8069"
 
 # ------------------------------------- RULES ---------------------------------
-# ./odoo/odoo-bin --addons-path=./enterprise/,./odoo/addons -i pos_iot,iot,l10n_be,point_of_sale -u pos_iot,iot,l10n_be,point_of_sale -d 16
+# Execute rules are running the following command behind the scenes:
+# ./odoo/odoo-bin --addons-path=./enterprise/,./odoo/addons -i pos_iot,10n_be -d master
 
-all: normal
+all: master
 
-normal:
+master:
 	$(RUN) $(DB)
 
 14:
@@ -107,7 +114,7 @@ normal:
 	$(RUN) $(DB15)
 
 16:
-	$(RUN) $(DB16) $(NO_LOG)
+	$(RUN) $(DB16)
 
 community:
 	$(RUN_COMMUNITY) $(DB_COMMUNITY)
