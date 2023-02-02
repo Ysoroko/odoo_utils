@@ -45,6 +45,10 @@ echo "" > /var/log/odoo/odoo-server.log
 # launch Odoo on IoT Box \
 ./odoo-bin --load=web,hw_posbox_homepage,hw_drivers --data-dir=/var/run/odoo --max-cron-threads=0 --log-level critical
 
+# launch Odoo on Windows IoT Box in python folder
+# Beforehand, we need to modify "logfile" in odoo.conf (rename it to 'logfileee' for example) \
+./python.exe ../server/odoo-bin -c ../server.odoo.conf
+
 # HTTP->HTTPS:
 # https://[iot_box ip]     !without :8069
 # On database: replace 'web' by 'ui'
