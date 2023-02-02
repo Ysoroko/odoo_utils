@@ -47,7 +47,7 @@ echo "" > /var/log/odoo/odoo-server.log
 
 # launch Odoo on Windows IoT Box in python folder
 # Beforehand, we need to modify "logfile" in odoo.conf (rename it to 'logfileee' for example) \
-./python.exe ../server/odoo-bin -c ../server.odoo.conf
+./python.exe ../server/odoo-bin -c ../server/odoo.conf
 
 # HTTP->HTTPS:
 # https://[iot_box ip]     !without :8069
