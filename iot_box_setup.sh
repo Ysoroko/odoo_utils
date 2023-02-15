@@ -13,7 +13,7 @@ verbose=${3}
 #   - not provided/anything --> copy files and restart Odoo on the IoT box
 #   - 'scp'                 --> only copy files without restarting Odoo on the IoT box
 #   - 'reboot'              --> copy files and then reboot the IoT box
-#   - 'manual'              --> copy files and start Odoo manually in the terminal on the IoT box
+#   - 'manual'              --> copy files and start Odoo manually in the terminal on the IoT box (currently not working)
 
 # ============================== VARIABLES ==============================
 
