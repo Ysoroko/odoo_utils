@@ -1,7 +1,22 @@
 #!/bin/bash
 
+# ============================== DESCRIPTION ==============================
+# This script is used to work with Odoo Raspberry Pi IoT Boxes
+# With it you can:
+#   - Check the IoT Box status
+#   - Copy your local code to the IoT Box
+#   - Restart Odoo / Reboot the IoT Box / Start Odoo through the command line
+#
+# Before running it you might need to adapt the "VARIABLES" section below
+# to your paths and IoT Box password
+#
+# Examples:
+#   sudo ./iot_box_setup.sh 10.100.66.148 -> copies local files to the IoT Box and restarts Odoo on it
+#   sudo ./iot_box_setup.sh 10.100.66.148 status -> checks the status of the IoT Box and Odoo on it
+#   sudo ./iot_box_setup.sh 10.100.66.148 copy verbos -> only copies files and produces a verbose output
+
 # ============================== ARGUMENTS ==============================
-# "iot_box_ip": IoT Box ip address (required)
+# "iot_box_ip": IoT Box ip address (required) in format like "10.100.66.148"
 # "action": action to do after the setup and files copy to the IoT box (optional)
 # "verbose": if the third argument is equal to "verbose", display info/error/debug messages (optional)
 
@@ -11,7 +26,7 @@ verbose=${3}
 
 # Possible arguments for second argument "action":
 #   - not provided/anything --> copy files and restart Odoo on the IoT box
-#   - 'scp'                 --> only copy files without restarting Odoo on the IoT box
+#   - 'copy'                --> only copy files without restarting Odoo on the IoT box
 #   - 'reboot'              --> copy files and then reboot the IoT box
 #   - 'manual'              --> copy files and start Odoo manually in the terminal on the IoT box
 #   - 'log'                 --> output iot box's odoo log file
@@ -190,81 +205,78 @@ ${SSHPASS} ${SSH} 'sudo mount -o remount,rw /' >$redirection 2>&1
 check_status "IoT box set to write mode"
 
 # ------ TRANSFER FILES TO IOT BOX ------
+center_print "Sending files to" "${iot_box_ip}"
 
+# addons/hw_posbox_homepage files
+loading "addons/hw_posbox_homepage" &
+loading_pid=$!
+${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_posbox_homepage/controllers/main.py pi@${iot_box_ip}:/home/pi/odoo/addons/hw_posbox_homepage/controllers/ >$redirection 2>&1
+${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_posbox_homepage/views/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_posbox_homepage/views/ >$redirection 2>&1
+check_status "" $loading_pid
 
-    center_print "Sending files to" "${iot_box_ip}"
+# addons/hw_drivers files
+loading "addons/hw_drivers" &
+loading_pid=$!
+# sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/controllers/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/controllers/ >$redirection 2>&1
+${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_drivers/iot_handlers/drivers/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/ >$redirection 2>&1
+${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_drivers/tools/helpers.py pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/tools/ >$redirection 2>&1
+${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_drivers/iot_handlers/interfaces/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/interfaces/ >$redirection 2>&1
+${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_drivers/driver.py pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/ >$redirection 2>&1
+${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_drivers/controllers/driver.py pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/controllers/ >$redirection 2>&1
 
-    # addons/hw_posbox_homepage files
-    loading "addons/hw_posbox_homepage" &
-    loading_pid=$!
-    ${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_posbox_homepage/controllers/main.py pi@${iot_box_ip}:/home/pi/odoo/addons/hw_posbox_homepage/controllers/ >$redirection 2>&1
-    ${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_posbox_homepage/views/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_posbox_homepage/views/ >$redirection 2>&1
-    check_status "" $loading_pid
+check_status "" $loading_pid
 
-    # addons/hw_drivers files
-    loading "addons/hw_drivers" &
-    loading_pid=$!
-    # sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/controllers/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/controllers/ >$redirection 2>&1
-    ${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_drivers/iot_handlers/drivers/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/ >$redirection 2>&1
-    ${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_drivers/tools/helpers.py pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/tools/ >$redirection 2>&1
-    ${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_drivers/iot_handlers/interfaces/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/interfaces/ >$redirection 2>&1
-    ${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_drivers/driver.py pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/ >$redirection 2>&1
-    ${SSHPASS} scp ${ODOO_ADDONS_PATH}/hw_drivers/controllers/driver.py pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/controllers/ >$redirection 2>&1
+# enterprise/iot/iot_handlers/drivers and interfaces files
+loading enterprise/iot_handlers &
+loading_pid=$!
+# sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/controllers/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/controllers/ >$redirection 2>&1
+${SSHPASS} scp ${ENTERPRISE_IOT_HANDLERS_PATH}/drivers/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/ >$redirection 2>&1
+${SSHPASS} scp ${ENTERPRISE_IOT_HANDLERS_PATH}/interfaces/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/interfaces/ >$redirection 2>&1
+check_status "" $loading_pid
 
-    check_status "" $loading_pid
+# addons/point_of_sale/tools/posbox/configuration/ files
+loading "posbox/configuration" &
+loading_pid=$!
+${SSHPASS} scp ${ODOO_ADDONS_PATH}/point_of_sale/tools/posbox/configuration/* pi@${iot_box_ip}:/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/ >$redirection 2>&1
+check_status "" $loading_pid
 
-    # enterprise/iot/iot_handlers/drivers and interfaces files
-    loading enterprise/iot_handlers &
-    loading_pid=$!
-    # sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/controllers/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/controllers/ >$redirection 2>&1
-    ${SSHPASS} scp ${ENTERPRISE_IOT_HANDLERS_PATH}/drivers/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/ >$redirection 2>&1
-    ${SSHPASS} scp ${ENTERPRISE_IOT_HANDLERS_PATH}/interfaces/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/interfaces/ >$redirection 2>&1
-    check_status "" $loading_pid
+# Worldline CTEP
+# Overwrite the CTEP library on the IoT box with our own
+# loading "worldline/ctep" &
+# loading_pid=$!
+# sshpass -p "raspberry" ssh pi@${iot_box_ip} 'sudo rm -rf /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/*' >$redirection 2>&1
+# sshpass -p "raspberry" sudo scp -r /home/odoo/src/worldline-lib/ctep_l pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib >$redirection 2>&1
+# sshpass -p "raspberry" ssh pi@${iot_box_ip} "sudo make -sC '/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep_l/'" >$redirection 2>&1
+# # rename 'ctep_l' to 'ctep'
+# sshpass -p "raspberry" ssh pi@${iot_box_ip} "sudo mv /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep_l /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep"
+# # copy all the dependencies files
+# sshpass -p "raspberry" sudo scp /home/odoo/src/worldline-lib/ctep_l/lib/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep >$redirection 2>&1
+# check_status "Worldline CTEP" $loading_pid
 
-    # addons/point_of_sale/tools/posbox/configuration/ files
-    loading "posbox/configuration" &
-    loading_pid=$!
-    ${SSHPASS} scp ${ODOO_ADDONS_PATH}/point_of_sale/tools/posbox/configuration/* pi@${iot_box_ip}:/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/ >$redirection 2>&1
-    check_status "" $loading_pid
+# --------------------------------
 
-    # Worldline CTEP
-    # Overwrite the CTEP library on the IoT box with our own
-    # loading "worldline/ctep" &
-    # loading_pid=$!
-    # sshpass -p "raspberry" ssh pi@${iot_box_ip} 'sudo rm -rf /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/*' >$redirection 2>&1
-    # sshpass -p "raspberry" sudo scp -r /home/odoo/src/worldline-lib/ctep_l pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib >$redirection 2>&1
-    # sshpass -p "raspberry" ssh pi@${iot_box_ip} "sudo make -sC '/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep_l/'" >$redirection 2>&1
-    # # rename 'ctep_l' to 'ctep'
-    # sshpass -p "raspberry" ssh pi@${iot_box_ip} "sudo mv /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep_l /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep"
-    # # copy all the dependencies files
-    # sshpass -p "raspberry" sudo scp /home/odoo/src/worldline-lib/ctep_l/lib/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep >$redirection 2>&1
-    # check_status "Worldline CTEP" $loading_pid
+# ------ RESTART / REBOOT / MANUAL / COPY ------
+center_print "Restart / Reboot / Manual / Copy"
 
-    # --------------------------------
+# If action is 'copy' only copy files without restarting
+if [ "${action}" = "copy" ] ; then
+    check_status "Only copy files"
 
-    # ------ MANUAL SECOND ARGUMENT STUFF ------
-    center_print "Restart / Reboot / Manual / Copy"
+# If action is 'reboot', reboot the box after copying
+elif [ "${action}" = "reboot" ] ; then
+    ${SSHPASS} ${SSH} 'sudo reboot' >$redirection 2>&1
+    check_status "Reboot IoT Box"
 
-    # If action is 'scp' only copy files without restarting
-    if [ "${action}" = "scp" ] ; then
-        check_status "Only copy files"
+# If action is 'manual', start Odoo manually on the IoT box
+# Currently triggers an "iwconfig error"
+elif [ "${action}" = "manual" ] ; then
+    ${SSHPASS} ${SSH} 'sudo service odoo stop' >$redirection 2>&1
+    sshpass -p "raspberry" ssh -t pi@${iot_box_ip} 'odoo/./odoo-bin --load=web,hw_posbox_homepage,hw_drivers,hw_escpos --data-dir=/var/run/odoo --max-cron-threads=0'
 
-    # If action is 'reboot', reboot the box after copying
-    elif [ "${action}" = "reboot" ] ; then
-        ${SSHPASS} ${SSH} 'sudo reboot' >$redirection 2>&1
-        check_status "Reboot IoT Box"
-
-    # If action is 'manual', start Odoo manually on the IoT box
-    # Currently triggers an "iwconfig error"
-    elif [ "${action}" = "manual" ] ; then
-        ${SSHPASS} ${SSH} 'sudo service odoo stop' >$redirection 2>&1
-        sshpass -p "raspberry" ssh -t pi@${iot_box_ip} 'odoo/./odoo-bin --load=web,hw_posbox_homepage,hw_drivers,hw_escpos --data-dir=/var/run/odoo --max-cron-threads=0'
-
-    # If no action or any other argument is provided, restart odoo on the IoT box
-    else
-        ${SSHPASS} ${SSH} 'sudo service odoo restart' >$redirection 2>&1
-        check_status "Restart Odoo server"
-    fi
+# If no action or any other argument is provided, restart odoo on the IoT box
+else
+    ${SSHPASS} ${SSH} 'sudo service odoo restart' >$redirection 2>&1
+    check_status "Restart Odoo server"
 fi
 
 line_print
