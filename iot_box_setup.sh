@@ -2,14 +2,14 @@
 
 # ============================== ARGUMENTS ==============================
 # "iot_box_ip": IoT Box ip address (required)
-# "manu": action to do after the setup and files copy to the IoT box (optional)
+# "action": action to do after the setup and files copy to the IoT box (optional)
 # "verbose": if the third argument is equal to "verbose", display info/error/debug messages (optional)
 
 iot_box_ip=${1}
-manu=${2}
+action=${2}
 verbose=${3}
 
-# Possible arguments for second argument "manu":
+# Possible arguments for second argument "action":
 #   - not provided/anything --> copy files and restart Odoo on the IoT box
 #   - 'scp'                 --> only copy files without restarting Odoo on the IoT box
 #   - 'reboot'              --> copy files and then reboot the IoT box
@@ -171,13 +171,13 @@ check_status "IoT ssh key generated"
 
 ${SSHPASS} ${SSH} 'pgrep python' >$redirection 2>&1
 check_status "Odoo running on IoT Box"
-if [ "${manu}" = "status" ] ; then
+if [ "${action}" = "status" ] ; then
     line_print
     exit 0
 fi
 
 # Odoo log file output
-if [ "${manu}" = "log" ] ; then
+if [ "${action}" = "log" ] ; then
     center_print "Odoo log file from" "${iot_box_ip}"
     ${SSHPASS} ${SSH} cat ${LOG_FILE_PATH}
     line_print
@@ -245,22 +245,22 @@ check_status "IoT box set to write mode"
     # ------ MANUAL SECOND ARGUMENT STUFF ------
     center_print "Restart / Reboot / Manual / Copy"
 
-    # If argument is 'scp' only copy files without restarting
-    if [ "${manu}" = "scp" ] ; then
+    # If action is 'scp' only copy files without restarting
+    if [ "${action}" = "scp" ] ; then
         check_status "Only copy files"
 
-    # If argument is 'reboot', reboot the box after copying
-    elif [ "${manu}" = "reboot" ] ; then
+    # If action is 'reboot', reboot the box after copying
+    elif [ "${action}" = "reboot" ] ; then
         ${SSHPASS} ${SSH} 'sudo reboot' >$redirection 2>&1
         check_status "Reboot IoT Box"
 
-    # If argument is 'manual', start Odoo manually on the IoT box
+    # If action is 'manual', start Odoo manually on the IoT box
     # Currently triggers an "iwconfig error"
-    elif [ "${manu}" = "manual" ] ; then
+    elif [ "${action}" = "manual" ] ; then
         ${SSHPASS} ${SSH} 'sudo service odoo stop' >$redirection 2>&1
         sshpass -p "raspberry" ssh -t pi@${iot_box_ip} 'odoo/./odoo-bin --load=web,hw_posbox_homepage,hw_drivers,hw_escpos --data-dir=/var/run/odoo --max-cron-threads=0'
 
-    # If no argument or any other argument is provided, restart odoo on the IoT box
+    # If no action or any other argument is provided, restart odoo on the IoT box
     else
         ${SSHPASS} ${SSH} 'sudo service odoo restart' >$redirection 2>&1
         check_status "Restart Odoo server"
