@@ -166,6 +166,9 @@ loading_pid=$!
 sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/iot_handlers/drivers/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/drivers/ >$redirection 2>&1
 sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/tools/helpers.py pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/tools/ >$redirection 2>&1
 sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/iot_handlers/interfaces/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/interfaces/ >$redirection 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/driver.py pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/ >$redirection 2>&1
+sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/controllers/driver.py pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/controllers/ >$redirection 2>&1
+
 check_status "" $loading_pid
 
 # enterprise/iot/iot_handlers/drivers and interfaces files
@@ -184,16 +187,16 @@ check_status "" $loading_pid
 
 # Worldline CTEP
 # Overwrite the CTEP library on the IoT box with our own
-loading "worldline/ctep" &
-loading_pid=$!
-sshpass -p "raspberry" ssh pi@${iot_box_ip} 'sudo rm -rf /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep' >$redirection 2>&1
-sshpass -p "raspberry" sudo scp -r /home/odoo/src/worldline-lib/ctep_l pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib >$redirection 2>&1
-sshpass -p "raspberry" ssh pi@${iot_box_ip} "sudo make -sC '/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep_l/'" >$redirection 2>&1
-#rename 'ctep_l' to 'ctep'
-sshpass -p "raspberry" ssh pi@${iot_box_ip} "sudo mv /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep_l /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep"
-# copy all the dependencie files
-sshpass -p "raspberry" sudo scp /home/odoo/src/worldline-lib/ctep_l/lib/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep >$redirection 2>&1
-check_status "Worldline CTEP" $loading_pid
+# loading "worldline/ctep" &
+# loading_pid=$!
+# sshpass -p "raspberry" ssh pi@${iot_box_ip} 'sudo rm -rf /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/*' >$redirection 2>&1
+# sshpass -p "raspberry" sudo scp -r /home/odoo/src/worldline-lib/ctep_l pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib >$redirection 2>&1
+# sshpass -p "raspberry" ssh pi@${iot_box_ip} "sudo make -sC '/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep_l/'" >$redirection 2>&1
+# # rename 'ctep_l' to 'ctep'
+# sshpass -p "raspberry" ssh pi@${iot_box_ip} "sudo mv /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep_l /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep"
+# # copy all the dependencie files
+# sshpass -p "raspberry" sudo scp /home/odoo/src/worldline-lib/ctep_l/lib/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ctep >$redirection 2>&1
+# check_status "Worldline CTEP" $loading_pid
 
 # --------------------------------
 
