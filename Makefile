@@ -10,18 +10,13 @@
 # kill -9 [pid] if 1st command doesn't work
 
 # GIT:
+# git branch -m [old_name] [new_name]
 # git branch --delete [branch_name]
-
-# Six Ips:
-# 10.30.66.50
-# 192.168.0.122
-# 192.168.1.11
-# 192.168.1.9 <--
-#
 
 
 # Working with the IoT Box:
 # My IoT MAC address: e4:5f:01:9e:8f:a0
+# 10.30.64.234 <-- latest
 
 # -------------------------
 # sudo ssh pi@[ip]
@@ -30,7 +25,6 @@
 # ex: /home/pi/odoo/addons/hw_posbox_homepage/views
 # ex2: /home/pi/odoo/addons/hw_drivers/iot_handlers/drivers
 # ex3: /home/pi/odoo/addons/hw_drivers/iot_handlers/lib
-# command to get ip address on the terminal of pi: "ip addr"
 #
 # Copy a directory: scp -r
 
@@ -45,9 +39,24 @@ echo "" > /var/log/odoo/odoo-server.log
 # launch Odoo on IoT Box \
 ./odoo-bin --load=web,hw_posbox_homepage,hw_drivers --data-dir=/var/run/odoo --max-cron-threads=0 --log-level critical
 
-# launch Odoo on Windows IoT Box in python folder
-# Beforehand, we need to modify "logfile" in odoo.conf (rename it to 'logfileee' for example) \
-./python.exe ../server/odoo-bin -c ../server/odoo.conf
+# 2) \
+python3.8 odoo-bin --load=web,hw_posbox_homepage,hw_drivers --data-dir=/var/run/odoo --max-cron-threads=0 --log-level critical
+
+# \
+sudo python3.8 -m pip install Pillow
+
+
+# Package manager on IoT Box \
+# 1) Mount the disk \
+# 2) Give me root access \
+sudo mount -o remount rw, /root_bypass_ramdisks/ \
+sudo chroot /root_bypass_ramdisks/
+
+# Check space: \
+du -h \
+du -h --max-depth=1
+
+# /usr/share/locale
 
 # HTTP->HTTPS:
 # https://[iot_box ip]     !without :8069
@@ -62,9 +71,11 @@ EXECUTABLE 		=	./odoo/odoo-bin
 
 C_ADDONS_ONLY	=	--addons-path=./odoo/addons
 
-ADDONS 			= 	--addons-path=./enterprise/,./odoo/addons
+ADDONS 			= 	--addons-path=./enterprise/,./odoo/addons,../jsTraining/tutorials
 
 MODULES 		= 	pos_iot,l10n_be
+
+OWL				=	--dev all
 
 
 # ----- DATABASES
@@ -109,7 +120,7 @@ LOCAL			=	"$(MY_IP):8069"
 all: master
 
 master:
-	$(RUN) $(DB)
+	$(RUN) $(DB) $(OWL)
 
 14:
 	$(RUN) $(DB14)
@@ -118,7 +129,7 @@ master:
 	$(RUN) $(DB15)
 
 16:
-	$(RUN) $(DB16)
+	$(RUN) $(DB16) $(OWL)
 
 community:
 	$(RUN_COMMUNITY) $(DB_COMMUNITY)
@@ -138,7 +149,7 @@ ip:
 
 # Open new Chrome tab with our ip address
 tab:
-	@google-chrome $(LOCAL)
+	@google-chrome $(LOCAL) >/dev/null 2>&1
 
 # -------
 
