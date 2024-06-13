@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Last IoT Password will be saved here:
-LAST_PASSWORD=ktewshx496vw
+LAST_PASSWORD=5twgpxy5xue5
 
 # ============================== DESCRIPTION ==============================
 # This script is used to work with Odoo Raspberry Pi IoT Boxes
@@ -250,9 +250,6 @@ else
     ${SSHPASS} ${SSH} 'sudo mount -o remount,rw /root_bypass_ramdisks' >$redirection 2>&1
     check_status "IoT Box set to write mode"
 
-    # sshpass -p 9hdg3upezar4 ssh-copy-id pi@192.168.68.57
-    # sshpass -p 4uph3edvc7z9 ssh-copy-id -f -o StrictHostKeyChecking=no pi@192.168.68.57
-
     # Allow to connect through SSH without a password
     # sshpass -p [password] ssh-copy-id -f -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa.pub pi@$[iot_box_ip]
     sshpass -p ${PASSWORD} ssh-copy-id -f -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa.pub pi@${iot_box_ip} >$redirection 2>&1
@@ -401,6 +398,9 @@ center_print "Sending files to" "${iot_box_ip}"
 # ${SSHPASS} scp ${LOCAL_ODOO_ADDONS_PATH}/hw_drivers/iot_handlers/interfaces/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/interfaces/ >$redirection 2>&1
 # check_status "hw_drivers/interfaces"
 
+# ${SSHPASS} scp ${LOCAL_ODOO_ADDONS_PATH}/hw_drivers/views/pos_display.html pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/views/ >$redirection 2>&1
+# check_status "hw_drivers/views/pos_display.html"
+
 # enterprise/iot/iot_handlers/drivers and interfaces files
 # loading iot/iot_handlers &
 # loading_pid=$!
@@ -422,7 +422,7 @@ center_print "Sending files to" "${iot_box_ip}"
 # sshpass -p "raspberry" scp ${ODOO_ADDONS_PATH}/hw_drivers/controllers/* pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/controllers/ >$redirection 2>&1
 # ${SSHPASS} scp ${LOCAL_ENTERPRISE_IOT_HANDLERS_PATH}/drivers/* pi@${iot_box_ip}:${IOT_BOX_ADDONS_PATH}/hw_drivers/iot_handlers/drivers/ >$redirection 2>&1
 # ${SSHPASS} scp ${LOCAL_ENTERPRISE_IOT_HANDLERS_PATH}/interfaces/* pi@${iot_box_ip}:${IOT_BOX_ADDONS_PATH}/hw_drivers/iot_handlers/interfaces/ >$redirection 2>&1
-${SSHPASS} scp ${LOCAL_ENTERPRISE_IOT_HANDLERS_PATH}/lib/* pi@${iot_box_ip}:${IOT_BOX_ADDONS_PATH}/hw_drivers/iot_handlers/lib/ >$redirection 2>&1
+# ${SSHPASS} scp ${LOCAL_ENTERPRISE_IOT_HANDLERS_PATH}/lib/* pi@${iot_box_ip}:${IOT_BOX_ADDONS_PATH}/hw_drivers/iot_handlers/lib/ >$redirection 2>&1
 # check_status "" $loading_pid
 
 ###################################### WORLDLINE ######################################
@@ -500,41 +500,41 @@ ${SSHPASS} scp ${LOCAL_ENTERPRISE_IOT_HANDLERS_PATH}/lib/* pi@${iot_box_ip}:${IO
 # sudo scp pi@10.100.66.151:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/tim/libsix_odoo_l.so .
 # sudo scp pi@192.168.1.11:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/tim/libsix_odoo_l.so .
 
-center_print "Six TIM Api"
+# center_print "Six TIM Api"
 
-# enterprise/pos_six/iot_handlers/drivers and interfaces files
-loading pos_iot_six/iot_handlers &
-loading_pid=$!
-${SSHPASS} scp ${LOCAL_SIX_IOT_HANDLERS_PATH}/drivers/* pi@${iot_box_ip}:${IOT_BOX_ADDONS_PATH}/hw_drivers/iot_handlers/drivers/ >$redirection 2>&1
-${SSHPASS} scp ${LOCAL_SIX_IOT_HANDLERS_PATH}/interfaces/* pi@${iot_box_ip}:${IOT_BOX_ADDONS_PATH}/hw_drivers/iot_handlers/interfaces/ >$redirection 2>&1
-check_status "" $loading_pid
+# # enterprise/pos_six/iot_handlers/drivers and interfaces files
+# loading pos_iot_six/iot_handlers &
+# loading_pid=$!
+# ${SSHPASS} scp ${LOCAL_SIX_IOT_HANDLERS_PATH}/drivers/* pi@${iot_box_ip}:${IOT_BOX_ADDONS_PATH}/hw_drivers/iot_handlers/drivers/ >$redirection 2>&1
+# ${SSHPASS} scp ${LOCAL_SIX_IOT_HANDLERS_PATH}/interfaces/* pi@${iot_box_ip}:${IOT_BOX_ADDONS_PATH}/hw_drivers/iot_handlers/interfaces/ >$redirection 2>&1
+# check_status "" $loading_pid
 
-${SSHPASS} ssh pi@${iot_box_ip} 'sudo rm -rf /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/tim' >$redirection 2>&1
-check_status "Delete TIM lib on IoT"
+# ${SSHPASS} ssh pi@${iot_box_ip} 'sudo rm -rf /home/pi/odoo/addons/hw_drivers/iot_handlers/lib/tim' >$redirection 2>&1
+# check_status "Delete TIM lib on IoT"
 
-${SSHPASS} ssh pi@${iot_box_ip} "sudo rm -rf /usr/lib/libtimapi.*" >$redirection 2>&1
-check_status "Unlink TIM dependencies"
+# ${SSHPASS} ssh pi@${iot_box_ip} "sudo rm -rf /usr/lib/libtimapi.*" >$redirection 2>&1
+# check_status "Unlink TIM dependencies"
 
-${SSHPASS} ${SSH} 'sudo mount -o remount,rw /' >$redirection 2>&1
-check_status "IoT box set to write mode"
+# ${SSHPASS} ${SSH} 'sudo mount -o remount,rw /' >$redirection 2>&1
+# check_status "IoT box set to write mode"
 
-loading "Send TIM to IoT" &
-loading_pid=$!
-${SSHPASS} sudo scp -r /home/odoo/src/worldline-lib/tim pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ >$redirection 2>&1
-check_status "" $loading_pid
+# loading "Send TIM to IoT" &
+# loading_pid=$!
+# ${SSHPASS} sudo scp -r /home/odoo/src/worldline-lib/tim pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/ >$redirection 2>&1
+# check_status "" $loading_pid
 
-${SSHPASS} ${SSH} 'sudo mount -o remount,rw /' >$redirection 2>&1
-check_status "IoT box set to write mode"
+# ${SSHPASS} ${SSH} 'sudo mount -o remount,rw /' >$redirection 2>&1
+# check_status "IoT box set to write mode"
 
-loading "Run TIM Makefile" &
-loading_pid=$!
-${SSHPASS} ssh pi@${iot_box_ip} "sudo make -sC '/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/tim/'" >$redirection 2>&1
-check_status "" $loading_pid
+# loading "Run TIM Makefile" &
+# loading_pid=$!
+# ${SSHPASS} ssh pi@${iot_box_ip} "sudo make -sC '/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/tim/'" >$redirection 2>&1
+# check_status "" $loading_pid
 
-loading "Copy dependecy lib" &
-loading_pid=$!
-${SSHPASS} sudo scp /home/odoo/src/worldline-lib/tim/lib_rpi/libtimapi.so.3.31.1-2272 pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/tim >$redirection 2>&1
-check_status "" $loading_pid
+# loading "Copy dependecy lib" &
+# loading_pid=$!
+# ${SSHPASS} sudo scp /home/odoo/src/worldline-lib/tim/lib_rpi/libtimapi.so.3.31.1-2272 pi@${iot_box_ip}:/home/pi/odoo/addons/hw_drivers/iot_handlers/lib/tim >$redirection 2>&1
+# check_status "" $loading_pid
 #--------------------------------
 
 # ------ RESTART / REBOOT / MANUAL / COPY ------
