@@ -14,19 +14,11 @@
 # git branch --delete [branch_name]
 
 
-# Working with the IoT Box:
-# My IoT MAC address: e4:5f:01:9e:8f:a0
-# 10.30.64.234 <-- latest
-
 # -------------------------
 # sudo ssh pi@[ip]
 # sudo mount -o remount,rw /
 # sudo scp file.txt pi@[ip]:/remote/directory/1
 # ex: /home/pi/odoo/addons/hw_posbox_homepage/views
-# ex2: /home/pi/odoo/addons/hw_drivers/iot_handlers/drivers
-# ex3: /home/pi/odoo/addons/hw_drivers/iot_handlers/lib
-#
-# Copy a directory: scp -r
 
 # log file: \
 cat /var/log/odoo/odoo-server.log
@@ -37,81 +29,75 @@ echo "" > /var/log/odoo/odoo-server.log
 # find file: find . -name 'PrinterDriver.py'
 
 # launch Odoo on IoT Box \
+./odoo-bin --load=web,hw_posbox_homepage,hw_drivers --data-dir=/var/run/odoo --max-cron-threads=0
+
+# critical only \
 ./odoo-bin --load=web,hw_posbox_homepage,hw_drivers --data-dir=/var/run/odoo --max-cron-threads=0 --log-level critical
 
-# 2) \
-python3.8 odoo-bin --load=web,hw_posbox_homepage,hw_drivers --data-dir=/var/run/odoo --max-cron-threads=0 --log-level critical
-
-# \
-sudo python3.8 -m pip install Pillow
-
-
-# Package manager on IoT Box \
-# 1) Mount the disk \
-# 2) Give me root access \
-sudo mount -o remount rw, /root_bypass_ramdisks/ \
-sudo chroot /root_bypass_ramdisks/
 
 # Check space: \
 du -h \
 du -h --max-depth=1
 
-# /usr/share/locale
-
-# HTTP->HTTPS:
-# https://[iot_box ip]     !without :8069
-# On database: replace 'web' by 'ui'
 
 # Log in as support: [client website]/_odoo/support
 
 # -------------------------------------VARS ----------------------------------
 
-
+# ----- PATHS -----
 EXECUTABLE 		=	./odoo/odoo-bin
 
 C_ADDONS_ONLY	=	--addons-path=./odoo/addons
 
-ADDONS 			= 	--addons-path=./enterprise/,./odoo/addons,../jsTraining/tutorials
-
-MODULES 		= 	pos_iot,l10n_be
-
-OWL				=	--dev all
+ADDONS 			= 	--addons-path=./enterprise/,./odoo/addons
 
 
-# ----- DATABASES
+# ----- DATABASES -----
 DB 				= 	-d master
-
-DB14			= 	-d 14
 
 DB15			= 	-d 15
 
 DB16			=	-d 16
 
-DB_COMMUNITY	=	-d community
+DB17			=	-d 17
 
-DB_NO_DEMO 		= 	-d no_demo --without-demo $(MODULES)
+DB18			=	-d 18
 
-DB_NO_DEMO_C	=	-d c_no_demo --without-demo $(MODULES)
+DB_NO_DEMO 		= 	-d no_demo --without-demo
 
-# -----
 
-# you can add "$(NO_LOG)" at the end of any execution rule to only show error output
+
+# ----- MODULES -----
+
+MODULES 		= 	pos_iot,l10n_be
+
+
+# ----- OPTIONS -----
+
 NO_LOG			=	--log-level error
 
 INSTALL_MODULES = 	-i $(MODULES)
 
 UPDATE_MODULES 	= 	-u $(MODULES)
 
-RUN				=	$(EXECUTABLE) $(ADDONS) $(INSTALL_MODULES) # $(UPDATE_MODULES) $(NO_LOG)
+DEV				=	--dev all
+
+
+# ----- RUN COMMANDS -----
+
+RUN				=	$(EXECUTABLE) $(ADDONS) $(INSTALL_MODULES) $(DEV) # $(UPDATE_MODULES) $(NO_LOG)
 
 RUN_COMMUNITY	=	$(EXECUTABLE) $(C_ADDONS_ONLY) $(INSTALL_MODULES)
 
-# --- IP Utils ---
+
+# ----- IP UTILS -----
 
 # extract local ip address
 MY_IP			=	$(shell ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($$2,a," ");print a[1]}')
 
 LOCAL			=	"$(MY_IP):8069"
+
+
 
 # ------------------------------------- RULES ---------------------------------
 # Execute rules are running the following command behind the scenes:
@@ -120,28 +106,28 @@ LOCAL			=	"$(MY_IP):8069"
 all: master
 
 master:
-	$(RUN) $(DB) $(OWL)
-
-14:
-	$(RUN) $(DB14)
+	$(RUN) $(DB)
 
 15:
 	$(RUN) $(DB15)
 
 16:
-	$(RUN) $(DB16) $(OWL)
+	$(RUN) $(DB16)
+
+17:
+	$(RUN) $(DB17)
+
+18:
+	$(RUN) $(DB18)
 
 community:
 	$(RUN_COMMUNITY) $(DB_COMMUNITY)
-
-c_no_demo:
-	$(RUN_COMMUNITY) $(DB_NO_DEMO_C)
 
 no_demo:
 	$(RUN) $(DB_NO_DEMO)
 
 
-# --- IP Utils ---
+# --- IP Utils Rules ---
 
 # Show my ip address
 ip:
@@ -153,4 +139,4 @@ tab:
 
 # -------
 
-.PHONY: all normal 14 15 16 community c_no_demo no_demo ip tab
+.PHONY: all master 15 16 17 18 community no_demo ip tab

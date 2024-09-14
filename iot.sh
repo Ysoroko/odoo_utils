@@ -61,7 +61,7 @@ IOT_BOX_HOME_PATH='/home/pi'
 
 # DEPENDENCIES TO INSTALL:
 # jq
-# sshpassq
+# sshpass
 
 # ============================== COMMANDS ==============================
 
@@ -157,6 +157,25 @@ function error_and_exit() {
 line_print
 
 # ------ ARGUMENTS SETUP ------
+# Log/error messages redirection setup
+if [ "${verbose}" = 'verbose' ]; then
+    redirection="/dev/stderr"
+    silent_flag=""
+else
+    redirection="/dev/null"
+    silent_flag="-s"
+fi
+
+# Ensure the dependency packages are installed
+{
+    dpkg -l | grep -q 'jq' && dpkg -l | grep -q 'sshpass'
+} >"$redirection" 2>&1
+
+if [ $? -ne 0 ]; then
+    error_and_exit "'jq' and/or 'sshpass' dependency package(s) not found. Install using 'sudo apt install jq sshpass'"
+fi
+
+
 # If no arguments is provided, ask the user to give the Iot Box ip address
 if [ $# -eq 0 ]; then
     error_and_exit "No IoT Box ip address given as argument"
